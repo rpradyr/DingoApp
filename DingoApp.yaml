@@ -1,0 +1,74 @@
+formatVersion: 1
+name: dingo-multicloud
+version: 1
+inputs:
+  os:
+    type: string
+    enum:
+      - ubuntu16
+    description: Please select operating system
+    default: ubuntu16
+    title: Please select operating system
+  platform:
+    type: string
+    enum:
+      - sddccloudaccount
+    description: Please select platform
+    default: sddccloudaccount
+    title: Please select platform
+  size:
+    type: string
+    enum:
+      - small
+      - medium
+      - large
+    description: Please select instane size
+    default: small
+    title: Please select instance size
+  environment:
+    type: string
+    enum:
+      - sddccloudzone
+    default: sddccloudzone
+resources:
+  dingo-svr:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      image: '${input.os}'
+      flavor: '${input.size}'
+      constraints:
+        - tag: '${input.environment}'
+      cloudConfig: |
+        packages:
+          - apache2
+        runcmd:
+          - ufw allow 'Apache Full'
+          - git clone https://github.com/kenshi08/dingo
+          - sudo cp -r dingo/src/* /var/www/html/
+        users:
+          - name: clement
+            ssh-authorized-keys:
+             - ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEApObvijLig4hunCYxM9ed+luR+6RfsBVygfs3LYZ1xIXGcpkfxByWW3LhZtxUsHa0MHR70pEkR3LuN1zkd0L2zIhwS6i6mDHlxV0mJsOJzs+P0ROu1nhZSS/0eUKEYVc/42QvMTjLXvxaT8e/qWoYFi3EA5iBptbsyjhXgoSeI9LkobsRktDjIUn/X0V5uzK4B7Li/tmkAZ+ASLC1OsgOou+L5OSaAL4nCBWOTRH8SRukDZ44ehrFFx19zFHUcvPtV11ntAN+UPPMDxoefexgZeNVHeeuJzzOA/1i2nNH0yDvJ0nXx3O8A3QksX5pJn5vSrrgL0/adYu9vjGVxSAG4Q==
+            sudo: ['ALL=(ALL) NOPASSWD:ALL']
+            groups: sudo
+            shell: /bin/bash
+      networks:
+        - network: '${resource["dingo-net"].id}'
+      remoteAccess:
+        keyPair: apj@vmware.com
+        password: Supporthelp1$
+  dingo-net:
+    type: Cloud.vSphere.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      name: web-net
+      networkType: existing
+      constraints:
+        - tag: sddccgwnetwork-1
