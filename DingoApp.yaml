@@ -60,7 +60,7 @@ resources:
         - network: '${resource["dingo-net"].id}'
       remoteAccess:
         keyPair: apj@vmware.com
-        password: Supporthelp1$
+        password: <>
   dingo-net:
     type: Cloud.vSphere.Network
     metadata:
